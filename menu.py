@@ -4,6 +4,9 @@ from font import font_5x3
 import random
 import colorsys
 from bresenham import bresenham
+import telegram
+from telegram.error import NetworkError, Unauthorized
+import threading
 
 theme = {
     "header": (0, 255, 255),
@@ -16,8 +19,113 @@ theme = {
     "snake_lose": (255, 0, 0),
     "snake_welcome": (0, 255, 0),
     "pong_paddle": (255, 255, 255),
-    "pong_ball": (255, 0, 0)
+    "pong_ball": (255, 0, 0),
+    "clock_color": (127, 255, 0),
 }
+
+
+class TelegramBotThread(threading.Thread):
+    def __init__(self, parent):
+        super(TelegramBotThread, self).__init__()
+        self.daemon = True
+
+        self.parent = parent
+
+        self.bot = telegram.Bot('357068228:AAHZmriAYgH1ywcFX4JOuOEp5t7BZFFzZ1U')
+        try:
+            self.update_id = self.bot.get_updates()[0].update_id
+        except IndexError:
+            self.update_id = None
+
+    def echo(self):
+        for update in self.bot.get_updates(offset=self.update_id, timeout=10):
+            self.update_id = update.update_id + 1
+            if update.message:
+                self.parent.new_text = True
+                self.parent.text = update.message.text.strip()
+
+    def run(self):
+        while 1:
+            try:
+                self.echo()
+            except NetworkError:
+                time.sleep(1)
+            except Unauthorized:
+                self.update_id += 1
+
+
+class Telegram(object):
+    def __init__(self, matrix, parent):
+        self.matrix = matrix
+        self.parent = parent
+
+        self.frame = np.zeros((20, 35, 3), np.uint8)
+
+        self.keys_down = self.matrix.get_keys()
+        self.last_keys_down = self.keys_down
+
+        self.last_text = self.text = ""
+        self.new_text = False
+        self.actual_render = self.frame
+        self.shift = 0
+
+        self.bot = TelegramBotThread(self)
+        self.bot.start()
+
+    def self_self_update(self, keys_down):
+        self.last_keys_down = self.keys_down
+        self.keys_down = keys_down
+
+        if self.keys_down["B"] and not self.last_keys_down["B"]: pass
+
+        if len(self.text) > 0:
+            self.frame = np.zeros((20, 35, 3), np.uint8)
+
+            if self.new_text:
+                if len(self.text) >= 9:
+                    self.text += "  --  "
+                self.actual_render = np.zeros((20, 4 * len(self.text), 3), np.uint8)
+                render_text(self.actual_render, (255, 255, 255), (0, 0, 0), self.text, 1, 8)
+                self.new = False
+                print "Nt"
+
+            if self.actual_render.shape[1] <= 35:
+                x = (35 / 2) - (self.actual_render.shape[1] / 2)
+                self.frame[0:20, x:x + self.actual_render.shape[1]] = self.actual_render
+            else:
+                self.frame = np.zeros((20, 35, 3), np.uint8)
+                self.frame[0:20, 0:35] = self.actual_render[0:20, 0:35]
+
+                self.actual_render = np.roll(self.actual_render, -1, 1)
+                time.sleep(0.1)
+
+        time.sleep(0.03)
+
+    def get_self_frame(self):
+        return self.frame
+
+
+class Clock(object):
+    def __init__(self, matrix, parent):
+        self.matrix = matrix
+        self.parent = parent
+
+        self.frame = np.zeros((20, 35, 3), np.uint8)
+
+        self.keys_down = self.matrix.get_keys()
+        self.last_keys_down = self.keys_down
+
+    def self_self_update(self, keys_down):
+        self.last_keys_down = self.keys_down
+        self.keys_down = keys_down
+        t = time.localtime()
+        "%02d:%02d" % (t.tm_hour, t.tm_min)
+
+        if self.keys_down["B"] and not self.last_keys_down["B"]: self.parent.back()
+        time.sleep(0.03)
+
+    def get_self_frame(self):
+        return self.frame
 
 
 class Settings(object):
@@ -153,7 +261,7 @@ class Pong(object):
         self.paddle_b_range = []
 
         self.ball = [17, 10]
-        self.ball_dest = [1, random.randint(0, 20)]
+        self.ball_dest = [1, random.randint(7, 13)]
         self.ball_curve = self.curve()
 
     def curve(self):
@@ -198,23 +306,23 @@ class Pong(object):
 
         if self.ball[0] == 2:  # Paddle check
             if self.ball[1] in self.paddle_a_range:
-                self.ball_dest = [33, random.randint(0, 20)]
+                self.ball_dest = [33, random.randint(7, 13)]
                 self.ball_curve = self.curve()
 
         if self.ball[0] == 1:  # Lose check
             self.ball = [17, 10]
-            self.ball_dest = [1, random.randint(5, 20)]
+            self.ball_dest = [1, random.randint(7, 13)]
             self.ball_curve = self.curve()
             time.sleep(1)
 
         if self.ball[0] == 32:  # Paddle check
             if self.ball[1] in self.paddle_b_range:
-                self.ball_dest = [1, random.randint(0, 20)]
+                self.ball_dest = [1, random.randint(7, 13)]
                 self.ball_curve = self.curve()
 
         if self.ball[0] == 33:  # Lose check
             self.ball = [17, 10]
-            self.ball_dest = [33, random.randint(0, 20)]
+            self.ball_dest = [33, random.randint(7, 13)]
             self.ball_curve = self.curve()
             time.sleep(1)
 
@@ -237,6 +345,7 @@ class Ambient(object):
         self.games = {
             "menu": None,
             "GoL": GameOfLife,
+            "Tele": Telegram
         }
         self.keys = self.games.keys()
         self.index = 0
@@ -493,6 +602,8 @@ def render_text(frame, color, background, text, x, y, font=font_5x3):
     f_h = font["PROP"]["height"]
 
     for char in text:
+        if not char in font.keys():
+            char = " "
         for y_ in range(0, f_h):
             for x_ in range(0, f_w):
                 frame[y + y_, x + x_] = background
