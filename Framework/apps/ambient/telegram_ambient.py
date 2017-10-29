@@ -17,8 +17,8 @@ class TelegramBotThread(threading.Thread):
 
         self.parent = parent
 
-        # self.bot = telegram.Bot('357068228:AAHZmriAYgH1ywcFX4JOuOEp5t7BZFFzZ1U')
-        self.bot = telegram.Bot('453991406:AAG_pYzmFSQT4gYnAcI4GNECMGXd0ZXlyYo')  # Backup
+        self.bot = telegram.Bot('357068228:AAHZmriAYgH1ywcFX4JOuOEp5t7BZFFzZ1U')
+        # self.bot = telegram.Bot('453991406:AAG_pYzmFSQT4gYnAcI4GNECMGXd0ZXlyYo')  # Backup
         try:
             self.update_id = self.bot.get_updates()[0].update_id
         except IndexError:
@@ -34,8 +34,8 @@ class TelegramBotThread(threading.Thread):
                     self.parent.photo = photo_file["file_path"]
                 else:
                     self.parent.new_text = True
-                    self.parent.text = update.message.text.strip()
-
+                    if not update.message.text is None:
+                        self.parent.text = update.message.text.strip()
     def run(self):
         while 1:
             try:
