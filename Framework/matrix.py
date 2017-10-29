@@ -2,6 +2,7 @@ import numpy as np
 import socket
 import time
 
+
 class UDPMatrix(object):
     def __init__(self):
         # TODO: Is this good practise?
@@ -52,8 +53,9 @@ class UDPMatrix(object):
         for x in range(0, self.width):
             for y in range(0, self.height):
                 color = tuple(map(int, frame[y, x]))
-                self.pygame.draw.rect(self.display, color,
-                                      (x * self.px_size, y * self.px_size, self.px_size, self.px_size))
+                self.pygame.draw.circle(self.display, color,
+                                        (x * self.px_size + (self.px_size / 2), y * self.px_size + (self.px_size / 2)),
+                                        (self.px_size / 2))
 
         if self.flip:
             frame = np.rot90(frame, 2)
@@ -92,6 +94,7 @@ class UDPMatrix(object):
 
         return keys_d
 
+
 class MatrixSimulator(object):
     def __init__(self):
         # TODO: Is this good practise?
@@ -128,8 +131,9 @@ class MatrixSimulator(object):
         for x in range(0, self.width):
             for y in range(0, self.height):
                 color = tuple(map(int, frame[y, x]))
-                self.pygame.draw.rect(self.display, color,
-                                      (x * self.px_size, y * self.px_size, self.px_size, self.px_size))
+                self.pygame.draw.circle(self.display, color,
+                                        (x * self.px_size + (self.px_size / 2), y * self.px_size + (self.px_size / 2)),
+                                        (self.px_size / 2))
 
         if self.flip:
             frame = np.rot90(frame, 2)

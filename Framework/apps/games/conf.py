@@ -1,9 +1,9 @@
-from clock import Clock
-from GameOfLife import GameOfLife
-from telegram_ambient import Telegram
+from pong import Pong
+from snake import Snake
+from breakout import Breakout
 
 apps = {
-    "Clock": Clock,
-    "GOL": GameOfLife,
-    "Tele": Telegram
+    "Snake": Snake,
+    "Pong": Pong,
+    "Breakout": Breakout
 }
