@@ -18,6 +18,9 @@ class Ambient(object):
     def is_key_down(self, key):
         return self.keys_down[key] and not self.last_keys_down[key]
 
+    def is_key_pressed(self, key):
+        return self.keys_down[key]
+
     def is_key_up(self, key):
         return self.last_keys_down[key] and not self.keys_down[key]
 

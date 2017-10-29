@@ -115,11 +115,17 @@ class MatrixSimulator(object):
 
         self.display = self.pygame.display.set_mode((self.width * self.px_size, self.height * self.px_size))
 
+        self.mode = True # [olel] True: Circles, False: Rects
+
     def do_flip(self):
         self.flip = not self.flip
 
     def do_invert(self):
         self.invert = not self.invert
+
+    def do_mode_change(self):
+        self.mode = not self.mode
+        self.display.fill((0, 0, 0))
 
     def set_frame(self, frame):
         f_height, f_width, f_colors = frame.shape
@@ -131,9 +137,13 @@ class MatrixSimulator(object):
         for x in range(0, self.width):
             for y in range(0, self.height):
                 color = tuple(map(int, frame[y, x]))
-                self.pygame.draw.circle(self.display, color,
-                                        (x * self.px_size + (self.px_size / 2), y * self.px_size + (self.px_size / 2)),
-                                        (self.px_size / 2))
+                if self.mode:
+                    self.pygame.draw.circle(self.display, color,
+                                            (x * self.px_size + (self.px_size / 2), y * self.px_size + (self.px_size / 2)),
+                                            (self.px_size / 2))
+                else:
+                    self.pygame.draw.rect(self.display, color,
+                                            (x * self.px_size, y * self.px_size, self.px_size, self.px_size))
 
         if self.flip:
             frame = np.rot90(frame, 2)

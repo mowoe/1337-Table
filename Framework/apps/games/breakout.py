@@ -33,7 +33,7 @@ class Breakout(Game):
         self.count = 0
         for y in range(0, 7):
             for x in range(0, 7):
-                self.count = self.count + self.level[y][x]
+                self.count += self.level[y][x]
 
     def loop(self):
         # Level
@@ -51,10 +51,10 @@ class Breakout(Game):
                     self.frame[y * 2 + 1, x * 5 + i] = c
 
         # Paddle
-        if self.keys_down["LEFT"] and self.paddle_x > 0:
+        if self.is_key_pressed("LEFT") and self.paddle_x > 0:
             self.frame[18, self.paddle_x + 4] = (0, 0, 0)
             self.paddle_x = self.paddle_x - 1
-        if self.keys_down["RIGHT"] and self.paddle_x < 30:
+        if self.is_key_pressed("RIGHT") and self.paddle_x < 30:
             self.frame[18, self.paddle_x] = (0, 0, 0)
             self.paddle_x = self.paddle_x + 1
         for i in range(0, 5):
@@ -65,7 +65,7 @@ class Breakout(Game):
         if self.ball_attached:
             self.ball[0] = self.paddle_x + 2
             self.ball[1] = 17
-            if self.keys_down["A"]:
+            if self.is_key_pressed("A"):
                 self.ball_attached = False
                 self.ball_velocity = [random.uniform(-1.0, 1.0), random.uniform(-0.1, -1.0)]
                 v_length = math.sqrt(
@@ -122,5 +122,8 @@ class Breakout(Game):
                         self.ball_velocity[1] = -self.ball_velocity[1]
 
         self.frame[int(self.ball[1]), int(self.ball[0])] = (0, 0, 255)
+
+        if self.is_key_up("B"):
+            self.parent.back()
 
         time.sleep(0.03)  # [Ole]: Benoetigt, ignorieren!

@@ -2,6 +2,7 @@ import numpy as np
 import time
 from theme import theme
 from font import render_text
+import matrix as mx
 
 
 class Settings(object):
@@ -18,6 +19,9 @@ class Settings(object):
             "Invert": self.matrix.do_invert,
             "Flip": self.matrix.do_flip,
         }
+
+        if type(self.matrix) == mx.MatrixSimulator:
+            self.options.update({"Mode": self.matrix.do_mode_change})
 
         self.keys = self.options.keys()
         self.index = 0
