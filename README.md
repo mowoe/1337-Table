@@ -42,6 +42,7 @@ class Example(Ambient):
         path = get_data_directory("Example") 
         
     	# Tastenabfragen:
+        # Tasten: "A", "B", "X", "Y", "START", "SELECT", "UP", "DOWN", "LEFT", "RIGHT"
         if self.is_key_down("B"): pass  # Beim drücken der Taste
         if self.is_key_pressed("B"): pass  # Bei anhaltendem Tastendruck
         if self.is_key_up("B"): pass  # Beim lösen der Taste
