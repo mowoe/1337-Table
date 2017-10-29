@@ -2,8 +2,7 @@ import random
 import numpy as np
 import time
 import colorsys
-
-from apps.ambient import Ambient
+from Framework.apps.ambient import Ambient
 
 class GameOfLife(Ambient):
     def __init__(self, matrix, parent):

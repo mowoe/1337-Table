@@ -1,7 +1,7 @@
-from clock import Clock
-from GameOfLife import GameOfLife
-from dots import Dots
-from telegram_ambient import Telegram
+from Framework.apps.ambient.clock import Clock
+from Framework.apps.ambient.GameOfLife import GameOfLife
+from Framework.apps.ambient.dots import Dots
+from Framework.apps.ambient.telegram_ambient import Telegram
 
 apps = {
     "Clock": Clock,

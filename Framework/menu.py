@@ -93,14 +93,3 @@ class Menu(object):
     def update(self, keys_down):
         self.active.self_update(keys_down)
 
-
-if __name__ == "__main__":
-    import matrix
-
-    matrix = matrix.MatrixSimulator()
-
-    menu = Menu(matrix)
-
-    while 1:
-        menu.update(matrix.get_keys())
-        menu.draw()

@@ -5,9 +5,9 @@ import threading
 import subprocess
 from PIL import Image
 import time
-from font import render_text
+from Framework.font import render_text
 
-from apps.ambient import Ambient
+from Framework.apps.ambient import Ambient
 
 
 class TelegramBotThread(threading.Thread):

@@ -18,6 +18,8 @@ class Settings(object):
         self.options = {
             "Invert": self.matrix.do_invert,
             "Flip": self.matrix.do_flip,
+            "Joyst.": self.matrix.change_to_joystick,
+            "Keyb.": self.matrix.change_to_keyboard
         }
 
         if type(self.matrix) == mx.MatrixSimulator:

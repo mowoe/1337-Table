@@ -1,5 +1,5 @@
 import numpy as np
-from theme import theme
+from Framework.theme import theme
 import time
 
 
@@ -23,6 +23,9 @@ class Game(object):
 
     def is_key_up(self, key):
         return self.last_keys_down[key] and not self.keys_down[key]
+
+    def clear(self):
+        self.frame = np.zeros((20, 35, 3), np.uint8) + theme["background"]
 
     def self_self_update(self, keys_down):
         self.last_keys_down = self.keys_down

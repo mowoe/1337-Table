@@ -1,5 +1,5 @@
 import numpy as np
-from theme import theme
+from Framework.theme import theme
 import time
 
 
@@ -14,6 +14,9 @@ class Ambient(object):
         self.last_keys_down = self.keys_down
 
     def loop(self): pass
+
+    def clear(self):
+        self.frame = np.zeros((20, 35, 3), np.uint8) + theme["background"]
 
     def is_key_down(self, key):
         return self.keys_down[key] and not self.last_keys_down[key]

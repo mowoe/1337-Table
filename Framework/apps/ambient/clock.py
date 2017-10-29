@@ -1,8 +1,8 @@
 import time
 import numpy as np
-from font import render_text
-from theme import theme
-from apps.ambient import Ambient
+from Framework.font import render_text
+from Framework.theme import theme
+from Framework.apps.ambient import Ambient
 
 class Clock(Ambient):
 

@@ -3,10 +3,11 @@ Breakout by ands
 """
 
 import numpy as np
-from apps.games import Game
+from Framework.apps.games import Game
 import random
 import math
 import time
+
 
 class Breakout(Game):
     def __init__(self, matrix, parent):

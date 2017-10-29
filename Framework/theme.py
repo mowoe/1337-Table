@@ -1,4 +1,3 @@
-
 theme = {
     "header": (0, 255, 255),
     "text": (0, 127, 255),
@@ -14,4 +13,7 @@ theme = {
     "clock_color": (127, 255, 0),
     "clock_background": (0, 0, 0),
     "clock_spacer": (255, 127, 0),
+    "yes": (0, 255, 0),
+    "no": (255, 0, 0),
+    "out_grayed": (70, 70, 70)
 }

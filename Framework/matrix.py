@@ -26,6 +26,14 @@ class UDPMatrix(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.connect(("tisch.warpzone", 4321))
 
+        self.input_type = "joystick"
+
+        self.joystick = None
+
+        if self.input_type == "joystick":
+            self.enable_joystick()
+
+    def enable_joystick(self):
         self.joystick = self.pygame.joystick.Joystick(0)
         self.joystick.init()
 
@@ -42,6 +50,14 @@ class UDPMatrix(object):
 
     def do_invert(self):
         self.invert = not self.invert
+
+    def change_to_keyboard(self):
+        self.input_type = "keyboard"
+
+    def change_to_joystick(self):
+        if self.joystick is None:
+            self.enable_joystick()
+        self.input_type = "joystick"
 
     def set_frame(self, frame):
         f_height, f_width, f_colors = frame.shape
@@ -66,33 +82,51 @@ class UDPMatrix(object):
         self.pygame.display.flip()
 
     def get_keys(self):
-        out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        it = 0
-        self.pygame.event.pump()
+        self.pygame.event.get()
+        if self.input_type == "keyboard":
+            keys = self.pygame.key.get_pressed()
+            keys_d = {
+                "UP": keys[self.pygame.K_w],
+                "DOWN": keys[self.pygame.K_s],
+                "LEFT": keys[self.pygame.K_a],
+                "RIGHT": keys[self.pygame.K_d],
+                "A": keys[self.pygame.K_SPACE],
+                "B": keys[self.pygame.K_b],
+                "X": keys[self.pygame.K_x],
+                "Y": keys[self.pygame.K_y],
+                "START": keys[self.pygame.K_RETURN],
+                "SELECT": keys[self.pygame.K_0],
+            }
 
-        # Read input from the two joysticks
-        for i in range(0, self.joystick.get_numaxes()):
-            out[it] = self.joystick.get_axis(i)
-            it += 1
-        # Read input from buttons
-        for i in range(0, self.joystick.get_numbuttons()):
-            out[it] = self.joystick.get_button(i)
-            it += 1
+            return keys_d
+        elif self.input_type == "joystick" and not self.joystick is None:
+            out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            it = 0
+            self.pygame.event.pump()
 
-        keys_d = {
-            "UP": out[1] < 0,
-            "DOWN": out[1] > 0,
-            "LEFT": out[0] < 0,
-            "RIGHT": out[0] > 0,
-            "A": out[3],
-            "B": out[4],
-            "X": out[5],
-            "Y": out[2],
-            "START": out[11],
-            "SELECT": out[10],
-        }
+            # Read input from the two joysticks
+            for i in range(0, self.joystick.get_numaxes()):
+                out[it] = self.joystick.get_axis(i)
+                it += 1
+            # Read input from buttons
+            for i in range(0, self.joystick.get_numbuttons()):
+                out[it] = self.joystick.get_button(i)
+                it += 1
 
-        return keys_d
+            keys_d = {
+                "UP": out[1] < 0,
+                "DOWN": out[1] > 0,
+                "LEFT": out[0] < 0,
+                "RIGHT": out[0] > 0,
+                "A": out[3],
+                "B": out[4],
+                "X": out[5],
+                "Y": out[2],
+                "START": out[11],
+                "SELECT": out[10],
+            }
+
+            return keys_d
 
 
 class MatrixSimulator(object):
@@ -109,13 +143,24 @@ class MatrixSimulator(object):
         self.flip = True
         self.invert = False
 
+        self.input_type = "keyboard"
+
         self.frame = np.array((self.height, self.width, self.colors))
 
         self.px_size = 20
 
         self.display = self.pygame.display.set_mode((self.width * self.px_size, self.height * self.px_size))
 
-        self.mode = True # [olel] True: Circles, False: Rects
+        self.mode = True  # [olel] True: Circles, False: Rects
+
+        self.joystick = None
+
+        if self.input_type == "joystick":
+            self.enable_joystick()
+
+    def enable_joystick(self):
+        self.joystick = self.pygame.joystick.Joystick(0)
+        self.joystick.init()
 
     def do_flip(self):
         self.flip = not self.flip
@@ -126,6 +171,15 @@ class MatrixSimulator(object):
     def do_mode_change(self):
         self.mode = not self.mode
         self.display.fill((0, 0, 0))
+
+    def change_to_keyboard(self):
+        self.input_type = "keyboard"
+
+    def change_to_joystick(self):
+        if self.joystick is None:
+            self.enable_joystick()
+        self.input_type = "joystick"
+
 
     def set_frame(self, frame):
         f_height, f_width, f_colors = frame.shape
@@ -139,11 +193,12 @@ class MatrixSimulator(object):
                 color = tuple(map(int, frame[y, x]))
                 if self.mode:
                     self.pygame.draw.circle(self.display, color,
-                                            (x * self.px_size + (self.px_size / 2), y * self.px_size + (self.px_size / 2)),
+                                            (x * self.px_size + (self.px_size / 2),
+                                             y * self.px_size + (self.px_size / 2)),
                                             (self.px_size / 2))
                 else:
                     self.pygame.draw.rect(self.display, color,
-                                            (x * self.px_size, y * self.px_size, self.px_size, self.px_size))
+                                          (x * self.px_size, y * self.px_size, self.px_size, self.px_size))
 
         if self.flip:
             frame = np.rot90(frame, 2)
@@ -154,21 +209,50 @@ class MatrixSimulator(object):
 
     def get_keys(self):
         self.pygame.event.get()
-        keys = self.pygame.key.get_pressed()
-        keys_d = {
-            "UP": keys[self.pygame.K_w],
-            "DOWN": keys[self.pygame.K_s],
-            "LEFT": keys[self.pygame.K_a],
-            "RIGHT": keys[self.pygame.K_d],
-            "A": keys[self.pygame.K_SPACE],
-            "B": keys[self.pygame.K_b],
-            "X": keys[self.pygame.K_x],
-            "Y": keys[self.pygame.K_y],
-            "START": keys[self.pygame.K_RETURN],
-            "SELECT": keys[self.pygame.K_0],
-        }
+        if self.input_type == "keyboard":
+            keys = self.pygame.key.get_pressed()
+            keys_d = {
+                "UP": keys[self.pygame.K_w],
+                "DOWN": keys[self.pygame.K_s],
+                "LEFT": keys[self.pygame.K_a],
+                "RIGHT": keys[self.pygame.K_d],
+                "A": keys[self.pygame.K_SPACE],
+                "B": keys[self.pygame.K_b],
+                "X": keys[self.pygame.K_x],
+                "Y": keys[self.pygame.K_y],
+                "START": keys[self.pygame.K_RETURN],
+                "SELECT": keys[self.pygame.K_0],
+            }
 
-        return keys_d
+            return keys_d
+        elif self.input_type == "joystick" and not self.joystick is None:
+            out = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            it = 0
+            self.pygame.event.pump()
+
+            # Read input from the two joysticks
+            for i in range(0, self.joystick.get_numaxes()):
+                out[it] = self.joystick.get_axis(i)
+                it += 1
+            # Read input from buttons
+            for i in range(0, self.joystick.get_numbuttons()):
+                out[it] = self.joystick.get_button(i)
+                it += 1
+
+            keys_d = {
+                "UP": out[1] < 0,
+                "DOWN": out[1] > 0,
+                "LEFT": out[0] < 0,
+                "RIGHT": out[0] > 0,
+                "A": out[3],
+                "B": out[4],
+                "X": out[5],
+                "Y": out[2],
+                "START": out[11],
+                "SELECT": out[10],
+            }
+
+            return keys_d
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from apps.ambient import Ambient
+from Framework.apps.ambient import Ambient
 import math
 import random
 import colorsys

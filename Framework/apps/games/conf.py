@@ -1,5 +1,5 @@
-from snake import Snake
-from breakout import Breakout
+from Framework.apps.games.snake import Snake
+from Framework.apps.games.breakout import Breakout
 
 apps = {
     "Snake": Snake,
