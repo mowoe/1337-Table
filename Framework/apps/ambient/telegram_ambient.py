@@ -60,7 +60,11 @@ class Telegram(Ambient):
 
         self.bot = TelegramBotThread(self)
         self.bot.start()
-
+        self.commands = {"/penis":(1,"B====D")}
+    def comm_handler(self, command):
+        if command in self.commands:
+            if self.commands[command][0] == 1:
+                self.comm_handler(self.commands[command][1])
     def loop(self):
 
         if self.last_keys_down["B"] and not self.keys_down["B"]: self.parent.back()
@@ -69,12 +73,15 @@ class Telegram(Ambient):
             self.frame = np.zeros((20, 35, 3), np.uint8)
 
             if self.new_text:
-                if len(self.text) >= 9:
-                    self.text += "  --  "
-                self.actual_render = np.zeros((20, 4 * len(self.text), 3), np.uint8)
-                render_text(self.actual_render, (255, 255, 255), (0, 0, 0), self.text, 1, 8)
-                self.new_text = False
-                self.show_mode = "text"
+                if self.text[0] != "/":
+                    if len(self.text) >= 9:
+                        self.text += "  --  "
+                    self.actual_render = np.zeros((20, 4 * len(self.text), 3), np.uint8)
+                    render_text(self.actual_render, (255, 255, 255), (0, 0, 0), self.text, 1, 8)
+                    self.new_text = False
+                    self.show_mode = "text"
+                else:
+                    self.comm_handler(self.text)
             elif self.new_photo:
                 self.new_photo = False
                 self.show_mode = "photo"
